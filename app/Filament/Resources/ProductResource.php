@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
+use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -26,18 +27,10 @@ class ProductResource extends Resource
         ->schema([
             Forms\Components\TextInput::make('name')->required(),
             Forms\Components\TextInput::make('code')->required(),
-            BelongsToSelect::make('category_id')
-                ->relationship('category')
-                ->required()
-                ->getSearchResultsUsing(function (string $query) {
-                    return Category::query()
-                        ->where('name', 'like', "%$query%")
-                        ->limit(50);
-                })
-                ->getOptionLabelUsing(function ($record) {
-                    return $record->name;
-                }),
             Forms\Components\TextInput::make('details')->required(),
+            BelongsToSelect::make('category_id')
+            ->relationship('category', 'name')
+            ->required(),
         ]);
     }
 
@@ -47,12 +40,10 @@ class ProductResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Product Name'),
                 Tables\Columns\TextColumn::make('code')->label('Product Code'),
-                Tables\Columns\BelongsToColumn::make('category.name')->label('Category'),
+                Tables\Columns\TextColumn::make('category.name')->label('Product Category'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category_id')
-                ->label('Category')
-                ->options(Category::pluck('name', 'id')),
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
